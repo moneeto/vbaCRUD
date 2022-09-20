@@ -1,0 +1,208 @@
+Imports System
+Imports System.Data
+Imports System.Data.OleDb
+Imports System.ComponentModel
+Public Class Form2
+    Dim conexion As New OleDbConnection("Provider=microsoft.jet.oledb.4.0;  data source=C:\Users\joako\Desktop\hola\A-1\A-1\BasedeDatosCOLEGIO.mdb")
+    'Carga
+    Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Me.Hide()
+        Me.CenterToScreen()
+        Dim conexion As New OleDbConnection("Provider=microsoft.jet.oledb.4.0; data source=C:\Users\joako\Desktop\hola\A-1\A-1\BasedeDatosCOLEGIO.mdb")
+        conexion.Open()
+        Dim adaptador As New OleDbDataAdapter
+        Dim registro As New DataSet
+        Dim consulta As String
+        consulta = "SELECT * FROM Access"
+        adaptador = New OleDbDataAdapter(consulta, conexion)
+        registro.Tables.Add("Access")
+        adaptador.Fill(registro.Tables("Access"))
+    End Sub
+    'DATAGRID:
+    Private Sub btnBuscarDatos_Click(sender As Object, e As EventArgs) Handles btnBuscarDatos.Click
+        conexion.Open()
+        Dim adaptador As New OleDbDataAdapter
+        Dim registro As New DataSet
+        Dim consulta As String
+        Dim buscador As String = buscadorDeGrado.Text
+        Dim lista As Integer
+        consulta = "SELECT * FROM Access WHERE Grado = '" & buscador & "'"
+        adaptador = New OleDbDataAdapter(consulta, conexion)
+        registro.Tables.Add("Access")
+        adaptador.Fill(registro.Tables("Access"))
+        promedioEnPantalla.DataSource = registro.Tables("Access")
+        lista = registro.Tables("Access").Rows.Count
+
+        If lista <> 0 Then
+            'Dim accessAlumno As String = "SELECT Alumno FROM Access "
+            'Dim accessGrado As String = "SELECT Grado FROM Access "
+            'Dim accessPromedio As String = "SELECT Promedio FROM Access "
+
+            'accessAlumno = registro.Tables("Access").Rows(0).Item("Alumno")
+            'accessGrado = registro.Tables("Access").Rows(0).Item("Grado")
+            'accessPromedio = registro.Tables("Access").Rows(0).Item("Promedio")
+        Else
+            MsgBox("Ingrese un año correcto.")
+        End If
+        conexion.Close()
+
+    End Sub
+
+    Private Sub btnBuscarPromedio_Click(sender As Object, e As EventArgs) Handles btnBuscarPromedio.Click
+        conexion.Open()
+        Dim vueltas As Integer
+        Dim adaptador As New OleDbDataAdapter
+        Dim buscador As String = buscadorDeGrado.Text
+        Dim lista As Integer
+        Dim arrayAño(4) As String
+        Dim arrayPromedio(4) As Double
+        Dim nota As Integer
+
+        arrayAño(0) = "Primero"
+        arrayAño(1) = "Segundo"
+        arrayAño(2) = "Tercero"
+        arrayAño(3) = "Cuarto"
+        arrayAño(4) = "Quinto"
+
+        'Para encontrar el promedio mas alto de cada curso, se me ocurrio hacerlo con arreglos: Por cada curso hice un bucle para cuantificar la cantidad
+        'de filas que hay en la lista, alojandolas en la variable de vueltas. Si la cantidad de vueltas es menor que la cantidad de filas, entonces va a sumar
+        ' uno, definiendo de esta manera el cociente de la division; es decir, una vez obtenidas las notas de los alumnos, dividirlas por la cantidad de filas contadas
+
+        'Promedio PRIMER GRADO
+        Dim registro As New DataSet
+        Dim consulta As String
+        consulta = "SELECT * FROM Access WHERE Grado = 'Primero' order by Promedio DESC"
+        vueltas = 0
+        adaptador = New OleDbDataAdapter(consulta, conexion)
+        registro.Tables.Add("Access")
+        adaptador.Fill(registro.Tables("Access"))
+        lista = registro.Tables("Access").Rows.Count
+
+        While (vueltas < lista)
+            nota = registro.Tables("Access").Rows(vueltas).Item("Promedio")
+            vueltas += 1
+            arrayPromedio(0) += nota
+
+        End While
+        arrayPromedio(0) = (arrayPromedio(0) / lista)
+        arrayPromedio(0) = Math.Round(arrayPromedio(0), 2)
+
+        'Promedio SEGUNDO GRADO
+        Dim registro1 As New DataSet
+        Dim consulta1 As String
+        consulta1 = "SELECT * FROM Access WHERE Grado = 'Segundo'"
+        vueltas = 0
+        adaptador = New OleDbDataAdapter(consulta1, conexion)
+        registro1.Tables.Add("Access")
+        adaptador.Fill(registro1.Tables("Access"))
+        lista = registro1.Tables("Access").Rows.Count
+        'MsgBox(lista, MsgBoxStyle.Critical)
+        While (vueltas < lista)
+            nota = registro1.Tables("Access").Rows(vueltas).Item("Promedio")
+            vueltas += 1
+            arrayPromedio(1) += nota
+        End While
+        arrayPromedio(1) = (arrayPromedio(1) / lista)
+        arrayPromedio(1) = Math.Round(arrayPromedio(1), 2)
+
+        'Promedio TERCER GRADO
+        Dim registro2 As New DataSet
+        Dim consulta2 As String
+        consulta2 = "SELECT * FROM Access WHERE Grado = 'Tercero'"
+        vueltas = 0
+        adaptador = New OleDbDataAdapter(consulta2, conexion)
+        registro2.Tables.Add("Access")
+        adaptador.Fill(registro2.Tables("Access"))
+        lista = registro2.Tables("Access").Rows.Count
+
+        While (vueltas < lista)
+            nota = registro2.Tables("Access").Rows(vueltas).Item("Promedio")
+            vueltas += 1
+            arrayPromedio(2) += nota
+        End While
+        arrayPromedio(2) = (arrayPromedio(2) / lista)
+        arrayPromedio(2) = Math.Round(arrayPromedio(2), 2)
+
+        'Promedio CUARTO GRADO
+        Dim registro3 As New DataSet
+        Dim consulta3 As String
+        consulta3 = "SELECT * FROM Access WHERE Grado = 'Cuarto'"
+        vueltas = 0
+        adaptador = New OleDbDataAdapter(consulta3, conexion)
+        registro3.Tables.Add("Access")
+        adaptador.Fill(registro3.Tables("Access"))
+        lista = registro3.Tables("Access").Rows.Count
+
+        While (vueltas < lista)
+            nota = registro3.Tables("Access").Rows(vueltas).Item("Promedio")
+            vueltas += 1
+            arrayPromedio(3) += nota
+        End While
+        arrayPromedio(3) = (arrayPromedio(3) / lista)
+        arrayPromedio(3) = Math.Round(arrayPromedio(3), 2)
+
+
+        'Promedio QUINTO GRADO
+        Dim registro4 As New DataSet
+        Dim consulta4 As String
+        consulta4 = "SELECT * FROM Access WHERE Grado = 'Quinto'"
+        vueltas = 0
+        adaptador = New OleDbDataAdapter(consulta4, conexion)
+        registro4.Tables.Add("Access")
+        adaptador.Fill(registro4.Tables("Access"))
+        lista = registro4.Tables("Access").Rows.Count
+
+        While (vueltas < lista)
+            nota = registro4.Tables("Access").Rows(vueltas).Item("Promedio")
+            vueltas += 1
+            arrayPromedio(4) += nota
+        End While
+        arrayPromedio(4) = (arrayPromedio(4) / lista)
+        arrayPromedio(4) = Math.Round(arrayPromedio(4), 2)
+
+        Dim arr As Double() = New Double() {arrayPromedio(0), arrayPromedio(1), arrayPromedio(2), arrayPromedio(3), arrayPromedio(4)}
+        Array.Sort(arr)
+        For Each str As Double In arr
+
+        Next
+
+
+        'Promedio EN PANTALLA
+        'Actualizacion de promedios mediante la eliminacion y sustitucion de calculos
+        Dim consultaEliminar As String
+        consultaEliminar = "delete * FROM Orden"
+        Dim borrar = New OleDbCommand(consultaEliminar, conexion)
+        borrar.ExecuteNonQuery()
+
+        'Bucle para insertar en la tabla el año y el promedio de cada curso. Incrementa "i" en las posiciones del array para determinar el valor de cada uno 
+        For i = 0 To 4 Step 1
+            Dim consultaOrden As String = "insert into Orden(Año, Promedio)values('" & arrayAño(i) & "','" & arrayPromedio(i) & "')"
+            Dim comando As New OleDbCommand(consultaOrden, conexion)
+            Dim dr As OleDbDataReader = comando.ExecuteReader
+        Next
+        'Ordena de Mayor a menor para determinar el promedio mas alto primero
+        consulta = "SELECT * FROM Orden order by Promedio DESC"
+        adaptador = New OleDbDataAdapter(consulta, conexion)
+        registro.Tables.Add("Orden")
+        adaptador.Fill(registro.Tables("Orden"))
+        promedioMasAlto.DataSource = registro.Tables("Orden")
+
+        primerMejorPromedioLbl.Visible = True
+        segundoMejorPromedioLbl.Visible = True
+        tercerMejorPromedioLbl.Visible = True
+        conexion.Close()
+    End Sub
+    Private Sub buscadorDeGrado_SelectedItemChanged(sender As Object, e As EventArgs) Handles buscadorDeGrado.SelectedItemChanged
+        buscadorDeGrado.Items.Add("Primero")
+        buscadorDeGrado.Items.Add("Segundo")
+        buscadorDeGrado.Items.Add("Tercero")
+        buscadorDeGrado.Items.Add("Cuarto")
+        buscadorDeGrado.Items.Add("Quinto")
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Form1.Show()
+        Me.Hide()
+    End Sub
+
+End Class

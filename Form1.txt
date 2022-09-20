@@ -1,0 +1,264 @@
+Imports System
+Imports System.Data
+Imports System.Data.OleDb
+Imports System.ComponentModel
+Public Class Form1
+    Dim conexion As New OleDbConnection("Provider=microsoft.jet.oledb.4.0; data source=C:\Users\joako\Desktop\hola\A-1\A-1\BasedeDatosCOLEGIO.mdb")
+    'Carga
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Try
+            conexion.Open()
+            Me.Hide()
+            Me.CenterToScreen()
+            MsgBox("Conexión exitosa.")
+        Catch ex As Exception
+            MsgBox("Error de conexión")
+        End Try
+
+        btnEliminar.Enabled = False
+        btnModificar.Enabled = False
+    End Sub
+
+    'FORMULARIO:
+
+    'Alta
+    Private Sub btnNuevo_Click(sender As Object, e As EventArgs) Handles btnNuevo.Click
+        Dim adaptador As OleDbDataAdapter
+        Dim lista As Integer
+        Dim registro As New DataSet
+        Dim consulta As String
+        Dim vueltas As Integer = 0
+        Dim legajo As Integer
+        Call vaciarTexto()
+        Call defaultMenu()
+        consulta = "SELECT * FROM Access"
+        adaptador = New OleDbDataAdapter(consulta, conexion)
+        registro.Tables.Add("Access")
+        adaptador.Fill(registro.Tables("Access"))
+        lista = registro.Tables("Access").Rows.Count
+
+        'Codigo para asignar un nuevo numero de legajo automaticamente cuando el boton es presionado
+        While vueltas < lista
+
+            legajo = registro.Tables("Access").Rows(vueltas).Item("Legajo")
+            vueltas = vueltas + 1
+
+        End While
+
+        legajoTextbox.Text = legajo + 1
+    End Sub
+    Private Sub Registrar_Click(sender As Object, e As EventArgs) Handles btnRegistrar.Click
+        Dim conexion As New OleDbConnection("Provider=microsoft.jet.oledb.4.0; data source=C:\Users\joako\Desktop\hola\A-1\A-1\BasedeDatosCOLEGIO.mdb")
+        conexion.Open()
+        If legajoTextbox.Text = "" Or alumnoTextbox.Text = "" Or dupGrado.Text = "" Or dupGrado.Text = "Establezca su año..." Or promedioFinal.Text = "" Then
+            MsgBox("No se pueden enviar registros vacíos")
+        Else
+            Dim consulta As String = "insert into Access(Legajo, Alumno, Grado, TrimestreUno, TrimestreDos, TrimestreTres, Promedio, Estado)values('" & legajoTextbox.Text & "','" & alumnoTextbox.Text & "','" & dupGrado.Text & "', '" & trimestreUno.Text & "', '" & trimestreDos.Text & " ','" & trimestreTres.Text & "' ,  '" & promedioFinal.Text & " ', '" & textEstado.Text & "')"
+            Dim comando As New OleDbCommand(consulta, conexion)
+            Dim DR As OleDbDataReader = comando.ExecuteReader
+            MsgBox("Datos Enviados")
+            Call vaciarTexto()
+        End If
+    End Sub
+
+    'Baja
+    Private Sub btnEliminar_Click(sender As Object, e As EventArgs) Handles btnEliminar.Click
+        Dim consulta As String
+        Dim comando As New OleDbCommand
+        Dim queryR As Integer
+        Dim legajo As Integer
+
+        If legajoTextbox.Text <> "" Then
+            legajo = Int(legajoTextbox.Text)
+            consulta = "DELETE * FROM Access WHERE Legajo=" & legajo
+            Try
+                conexion.Open()
+                comando = New OleDbCommand(consulta, conexion)
+                queryR = comando.ExecuteNonQuery()
+
+                If queryR > 0 Then
+                    MsgBox("Datos eliminados")
+                    Call vaciarTexto()
+                Else
+                    MsgBox("Error al eliminar datos")
+                End If
+            Catch ex As Exception
+            Finally
+                If conexion.State = ConnectionState.Open Then
+                    conexion.Close()
+                End If
+            End Try
+        End If
+    End Sub
+
+    'Modificaciones
+    Private Sub btnModificar_Click(sender As Object, e As EventArgs) Handles btnModificar.Click
+        Dim comando As New OleDb.OleDbCommand
+        Dim adaptador As New OleDb.OleDbDataAdapter
+        Dim registro As New DataSet
+        Dim codigocontro2 As Integer
+        Dim lista As New Byte
+        Dim Codicontro2 As Long
+        Dim Yes As Byte
+        Yes = MsgBox("¿Desea actualizar los datos?", vbYesNo, "Editar registro")
+        If Yes = vbYes Then
+            Dim consulta1 As String
+            Dim lista1 As New Byte
+            Dim adaptador1 As New OleDbDataAdapter
+            Dim registro1 As New DataSet
+            codigocontro2 = Val(legajoTextbox.Text)
+            consulta1 = "SELECT * FROM Access WHERE Legajo  = " & Codicontro2 & ""
+            adaptador1 = New OleDbDataAdapter(consulta1, conexion)
+            registro1 = New DataSet
+            adaptador1.Fill(registro1, "Access")
+            lista1 = registro1.Tables("Access").Rows.Count
+            consulta1 = "UPDATE Access SET  Alumno = '" & alumnoTextbox.Text & "',  Grado = '" & dupGrado.Text & "', TrimestreUno = '" & trimestreUno.Text & "', TrimestreDos = '" & trimestreDos.Text & "', TrimestreTres ='" & trimestreTres.Text & "', Promedio = '" & promedioFinal.Text & "', Estado= '" & textEstado.Text & "'WHERE Legajo = " & codigocontro2 & ""
+            Dim comandoUpdate As New OleDbCommand(consulta1, conexion)
+            Dim lector As OleDbDataReader = comandoUpdate.ExecuteReader
+            MsgBox("Se actualizaron los datos correctamente.")
+            Call vaciarTexto()
+        End If
+    End Sub
+
+    Private Sub btnBuscar_Click(sender As Object, e As EventArgs) Handles btnBuscar.Click
+        If legajoTextbox.Text = "" Then
+            Call vaciarTexto()
+            Call defaultMenu()
+        End If
+        Dim Comando2 As New OleDb.OleDbCommand
+        Dim Adaptador As New OleDb.OleDbDataAdapter
+        Dim Registro As New DataSet
+        Dim conexion As New OleDbConnection("Provider=microsoft.jet.oledb.4.0; data source=C:\Users\joako\Desktop\hola\A-1\A-1\BasedeDatosCOLEGIO.mdb")
+        Dim consulta As String
+        Dim lista As New Integer
+        Dim accessEstado As String
+        accessEstado = "SELECT * FROM Access WHERE Estado = "
+        btnRegistrar.Enabled = True
+        btnCalcular.Enabled = True
+        If legajoTextbox.Text <> "" Then
+            consulta = "SELECT * FROM Access WHERE Legajo = " & legajoTextbox.Text & ""
+            Adaptador = New OleDb.OleDbDataAdapter(consulta, conexion)
+            Registro = New DataSet
+            Adaptador.Fill(Registro, "Access")
+            lista = Registro.Tables("Access").Rows.Count
+            btnModificar.Enabled = True
+            btnEliminar.Enabled = True
+            If lista <> 0 Then
+                legajoTextbox.Text = Registro.Tables("Access").Rows(0).Item("Legajo")
+                alumnoTextbox.Text = Registro.Tables("Access").Rows(0).Item("Alumno")
+                dupGrado.Text = Registro.Tables("Access").Rows(0).Item("Grado")
+                trimestreUno.Text = Registro.Tables("Access").Rows(0).Item("TrimestreUno")
+                trimestreDos.Text = Registro.Tables("Access").Rows(0).Item("TrimestreDos")
+                trimestreTres.Text = Registro.Tables("Access").Rows(0).Item("TrimestreTres")
+                promedioFinal.Text = Registro.Tables("Access").Rows(0).Item("Promedio")
+                textEstado.Text = Registro.Tables("Access").Rows(0).Item("Estado")
+            Else
+                MsgBox("No existe registro.")
+            End If
+        End If
+        conexion.Close()
+    End Sub
+
+    Private Sub btnPromediar_Click(sender As Object, e As EventArgs) Handles btnCalcular.Click
+        Dim n1, n2, n3, promedio, redondeo As Double
+        n1 = trimestreUno.Text
+        n2 = trimestreDos.Text
+        n3 = trimestreTres.Text
+        promedio = (n1 + n2 + n3) / 3
+        redondeo = Math.Round(promedio, 2)
+        promedioFinal.Text = redondeo
+
+        If redondeo < 7 Then
+            textEstado.Text = "Desaprobado"
+        Else
+            textEstado.Text = "Aprobado"
+        End If
+
+        If n1 > 10 Or n2 > 10 Or n3 > 10 Then
+            promedioFinal.Text = "ERROR"
+            MsgBox("Ingrese valores entre 1 y 10")
+            Call vaciarNotas()
+        ElseIf n1 = 0 Or n2 = 0 Or n3 = 0 Then
+            promedioFinal.Text = "ERROR"
+            MsgBox("Ingrese valores entre 1 y 10")
+            Call vaciarNotas()
+        End If
+    End Sub
+
+    'ASCII
+    Private Sub legajo_KeyPress(sender As Object, e As KeyPressEventArgs) Handles legajoTextbox.KeyPress
+        If Asc(e.KeyChar) <> 8 Then
+            If Asc(e.KeyChar) < 48 Or Asc(e.KeyChar) > 57 Then
+                e.Handled = True
+            End If
+            If Asc(e.KeyChar) = 46 Then
+                e.Handled = False
+            End If
+        End If
+    End Sub
+
+    Private Sub trimestreUno_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles trimestreUno.KeyPress
+        If Not IsNumeric(e.KeyChar) And Not Char.IsControl(e.KeyChar) Then
+            e.Handled = True
+        End If
+    End Sub
+    Private Sub trimestreDos_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles trimestreDos.KeyPress
+        If Not IsNumeric(e.KeyChar) And Not Char.IsControl(e.KeyChar) Then
+            e.Handled = True
+        End If
+    End Sub
+    Private Sub trimestreTres_KeyPress(ByVal sender As Object, ByVal e As System.Windows.Forms.KeyPressEventArgs) Handles trimestreTres.KeyPress
+        If Not IsNumeric(e.KeyChar) And Not Char.IsControl(e.KeyChar) Then
+            e.Handled = True
+        End If
+    End Sub
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+        Form3.Show()
+        Me.Hide()
+    End Sub
+
+    Private Sub btnVolver_Click(sender As Object, e As EventArgs) Handles btnVolver.Click
+        Call vaciarTexto()
+        dupGrado.Text = "Establezca su año..."
+        Call defaultMenu()
+
+    End Sub
+    'Configuraciones y Funciones
+    Private Sub DomainUpDown1_SelectedItemChanged(sender As Object, e As EventArgs) Handles dupGrado.SelectedItemChanged
+        dupGrado.Items.Add("Primero")
+        dupGrado.Items.Add("Segundo")
+        dupGrado.Items.Add("Tercero")
+        dupGrado.Items.Add("Cuarto")
+        dupGrado.Items.Add("Quinto")
+
+    End Sub
+    Private Sub vaciarNotas()
+        trimestreUno.Clear()
+        trimestreDos.Clear()
+        trimestreTres.Clear()
+        promedioFinal.Clear()
+        textEstado.Text = "..."
+
+    End Sub
+    Private Sub vaciarTexto()
+        legajoTextbox.Clear()
+        alumnoTextbox.Clear()
+        dupGrado.Text = "Establezca su año..."
+        trimestreUno.Clear()
+        trimestreDos.Clear()
+        trimestreTres.Clear()
+        promedioFinal.Clear()
+        textEstado.Text = "..."
+        btnBuscar.Visible = True
+        btnCalcular.Visible = True
+        btnRegistrar.Visible = True
+    End Sub
+    Private Sub defaultMenu()
+        btnBuscar.Enabled = True
+        btnCalcular.Enabled = True
+        btnRegistrar.Enabled = True
+        btnNuevo.Enabled = True
+        btnModificar.Enabled = False
+        btnEliminar.Enabled = False
+    End Sub
+End Class
